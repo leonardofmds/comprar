@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { clear } from "react-native/types_generated/Libraries/LogBox/Data/LogBoxData";
 
 export const styles = StyleSheet.create({
   container: {
@@ -6,12 +7,41 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#d0d2d8',
     paddingTop: 62,
-    padding: 24,
-    gap: 24,
   },
   logo: {
     width: 134,
     height: 34,
   },
+  form: {
+    width: '100%',
+    paddingHorizontal: 16,
+    gap: 7,
+    marginTop: 42,
+  },
+  content: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    padding: 24,
+    paddingTop: 32,
+    marginTop: 24,
+  },
+  header: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e4e3ec',
+    paddingBottom: 12,
+  },
+  clearButton: {
+    marginLeft: 'auto',
+  },
+  clearText: {
+    fontSize: 12,
+    color: '#828282',
+    fontWeight: '600',
+  }
 });
-
