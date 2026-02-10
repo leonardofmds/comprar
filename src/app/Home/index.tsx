@@ -1,14 +1,16 @@
-import { View, Image, TouchableOpacity, Text, FlatList } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Image, TouchableOpacity, Text, FlatList, Alert } from 'react-native';
 import { styles } from './styles';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Filter } from '@/components/Filter';
 import { FilterStatus } from '@/types/filter.status';
 import { Item } from '@/components/Item';
+import { itemsStorage, ItemStorage } from '@/storage/itemsStorage';
 
 const FILTER_STATUS: FilterStatus[] = [
   FilterStatus.PENDING,
-  FilterStatus.DONE
+  FilterStatus.DONE,
 ];
 
 const ITEMS = [
@@ -34,6 +36,39 @@ const ITEMS = [
   }
 ]
 export function Home() {
+  const [filter, setFilter] = useState<FilterStatus>(FilterStatus.PENDING);
+  const [description, setDescription] = useState("");
+  const [items, setItems] = useState<ItemStorage[]>([]);
+
+  function handleAddItem() {
+    if (!description.trim()) {
+      return Alert.alert("Atenção", "A descrição do item não pode ser vazia.");
+    }
+
+    const newItem = {
+      id: Math.random().toString(36).substring(2),
+      description,
+      status: FilterStatus.PENDING,
+    }
+
+    setItems([...items, newItem]);
+
+  }
+
+  async function getItems() {
+    try {
+      const response = await itemsStorage.get();
+      setItems(response);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível carregar os itens.");
+    }
+  }
+
+  useEffect(() => {
+    getItems();
+  }, [])
+
   return (
     <View style={styles.container}>
       <Image
@@ -42,15 +77,23 @@ export function Home() {
       />
       <View style={styles.form}
       >
-        <Input placeholder='O que você precisa comprar?' />
+        <Input
+          placeholder='O que você precisa comprar?'
+          onChangeText={setDescription}
+        />
         <Button
-          title="Entrar" />
+          title="Adicionar" onPress={handleAddItem} />
       </View>
       <View style={styles.content}>
         <View style={styles.header}>
           {
             FILTER_STATUS.map(status => (
-              <Filter key={status} status={status} isActive></Filter>
+              <Filter
+                key={status}
+                status={status}
+                isActive={filter === status}
+                onPress={() => setFilter(status)}
+              />
             ))
           }
           <TouchableOpacity style={styles.clearButton}>
@@ -59,18 +102,18 @@ export function Home() {
         </View>
 
         <FlatList
-          data={ITEMS}
+          data={items.filter(item => item.status === filter)}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <Item
               data={item}
-              onRemove={() => { console.log("Remover") }}
+              onRemove={() => { setItems(prevItems => prevItems.filter(i => i.id !== item.id)) }}
               onStatus={() => { console.log("Mudar status") }}
             />
           )}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
-          ItemSeparatorComponent={()=> <View style={styles.separator} />}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={() => <Text style={styles.empty}>Nenhum item aqui.</Text>}
         />
