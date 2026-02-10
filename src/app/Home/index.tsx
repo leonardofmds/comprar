@@ -13,28 +13,6 @@ const FILTER_STATUS: FilterStatus[] = [
   FilterStatus.DONE,
 ];
 
-const ITEMS = [
-  {
-    id: "1",
-    status: FilterStatus.PENDING,
-    description: "Arroz",
-  },
-  {
-    id: "2",
-    status: FilterStatus.DONE,
-    description: "Feijão",
-  },
-  {
-    id: "3",
-    status: FilterStatus.PENDING,
-    description: "Macarrão",
-  },
-  {
-    id: "4",
-    status: FilterStatus.PENDING,
-    description: "Carne",
-  }
-]
 export function Home() {
   const [filter, setFilter] = useState<FilterStatus>(FilterStatus.PENDING);
   const [description, setDescription] = useState("");
@@ -52,12 +30,14 @@ export function Home() {
     }
 
     await itemsStorage.add(newItem)
-    getItems();
+    itemsByStatus();
+    setDescription("");
+    setFilter(FilterStatus.PENDING);
   }
 
-  async function getItems() {
+  async function itemsByStatus() {
     try {
-      const response = await itemsStorage.get();
+      const response = await itemsStorage.getByStatus(filter);
       setItems(response);
     } catch (error) {
       console.log(error);
@@ -66,8 +46,8 @@ export function Home() {
   }
 
   useEffect(() => {
-    getItems();
-  }, [])
+    itemsByStatus();
+  }, [filter]);
 
   return (
     <View style={styles.container}>
@@ -80,6 +60,7 @@ export function Home() {
         <Input
           placeholder='O que você precisa comprar?'
           onChangeText={setDescription}
+          value={description}
         />
         <Button
           title="Adicionar" onPress={handleAddItem} />
@@ -102,7 +83,7 @@ export function Home() {
         </View>
 
         <FlatList
-          data={items.filter(item => item.status === filter)}
+          data={items}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <Item
