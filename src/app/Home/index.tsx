@@ -40,7 +40,7 @@ export function Home() {
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<ItemStorage[]>([]);
 
-  function handleAddItem() {
+  async function handleAddItem() {
     if (!description.trim()) {
       return Alert.alert("Atenção", "A descrição do item não pode ser vazia.");
     }
@@ -51,8 +51,8 @@ export function Home() {
       status: FilterStatus.PENDING,
     }
 
-    setItems([...items, newItem]);
-
+    await itemsStorage.add(newItem)
+    getItems();
   }
 
   async function getItems() {
