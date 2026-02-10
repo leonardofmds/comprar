@@ -45,6 +45,55 @@ export function Home() {
     }
   }
 
+  async function handleRemoveItem(id: string) {
+    try {
+      await itemsStorage.remove(id);
+      itemsByStatus();
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível remover o item.");
+    } 
+  }
+
+  async function handleClearItems() {
+    Alert.alert(
+      "Limpar itens",
+      "Tem certeza que deseja limpar todos os itens?",
+      [
+        {
+          text: "Não", 
+          style: "cancel"
+        },
+        {
+          text: "Sim",  
+          onPress: async () => {
+            try {
+              await onClear();
+            } catch (error) {
+              console.log(error);
+              Alert.alert("Erro", "Não foi possível limpar os itens.");
+            }
+          }
+        }
+      ]
+    );
+  }
+
+  async function onClear() {
+    await itemsStorage.clear();
+    setItems([]);
+  }
+
+  async function handleToggleStatus(id: string) {
+    try {
+      await itemsStorage.toggleStatus(id);
+      itemsByStatus();
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível atualizar o status do item.");
+    }
+  }
+
   useEffect(() => {
     itemsByStatus();
   }, [filter]);
@@ -77,7 +126,7 @@ export function Home() {
               />
             ))
           }
-          <TouchableOpacity style={styles.clearButton}>
+          <TouchableOpacity style={styles.clearButton} onPress={handleClearItems}>
             <Text style={styles.clearText}>Limpar</Text>
           </TouchableOpacity>
         </View>
@@ -88,8 +137,8 @@ export function Home() {
           renderItem={({ item }) => (
             <Item
               data={item}
-              onRemove={() => { setItems(prevItems => prevItems.filter(i => i.id !== item.id)) }}
-              onStatus={() => { console.log("Mudar status") }}
+              onRemove={() => { handleRemoveItem(item.id) }}
+              onStatus={() => { handleToggleStatus(item.id) }}
             />
           )}
           showsVerticalScrollIndicator={false}
